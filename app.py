@@ -1,62 +1,40 @@
-# app.py
-import os
 from flask import Flask, request, jsonify
-from flask_cors import CORS
-import pdfplumber
-import pytesseract
-from PIL import Image
-import pandas as pd
+from flask_cors import CORS, cross_origin
 
 app = Flask(__name__)
+# This enables CORS for all domains on all routes.
 CORS(app)
 
-from flask_cors import CORS
-CORS(app)
-
-@app.route("/")
-def home():
-    return "Wild Octave Backend is running!"
-
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+@app.route('/')
+def hello_world():
+    # A simple route to confirm the server is running.
+    return 'Hello from the Wild Octave Organics Backend!'
 
 @app.route('/extract', methods=['POST'])
-def extract():
+@cross_origin() # This is an extra measure to ensure CORS is handled for this route
+def extract_data():
+    # Basic check to ensure a file was uploaded.
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
     file = request.files['file']
-    filename = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(filename)
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
 
-    ext = file.filename.lower().split('.')[-1]
-    items = []
+    # --- MOCK EXTRACTION LOGIC ---
+    # This is our placeholder data. In the future, this section will be replaced
+    # with real logic to parse the uploaded file.
+    mock_data = {
+        "vendor": "Mock Supplier Inc.",
+        "items": [
+            {"item_name": "Organic Bananas", "cost_ex_gst": "15.50", "units": "1kg", "unit_price": None},
+            {"item_name": "Almond Milk 1L", "cost_ex_gst": "24.00", "units": "6 units", "unit_price": "4.00"},
+            {"item_name": "Protein Powder 500g", "cost_ex_gst": "35.00", "units": "1 unit", "unit_price": "35.00"}
+        ]
+    }
+    
+    # This is the corrected line. It sends the entire mock_data object.
+    return jsonify(mock_data)
 
-    if ext in ['pdf']:
-        with pdfplumber.open(filename) as pdf:
-            for page in pdf.pages:
-                table = page.extract_table()
-                if table:
-                    # Skip header row, flatten rest
-                    for row in table[1:]:
-                        items.append({'raw': row})
-    elif ext in ['jpg', 'jpeg', 'png']:
-        image = Image.open(filename)
-        text = pytesseract.image_to_string(image)
-        # Very basic: split lines, you’ll want to improve this!
-        for line in text.splitlines():
-            if line.strip():
-                items.append({'raw': line.strip()})
-    elif ext in ['xlsx', 'xls']:
-        df = pd.read_excel(filename)
-        for _, row in df.iterrows():
-            items.append({'raw': row.to_dict()})
-    elif ext == 'csv':
-        df = pd.read_csv(filename)
-        for _, row in df.iterrows():
-            items.append({'raw': row.to_dict()})
-    else:
-        return jsonify({'error': 'Unsupported file type'}), 400
-
-    os.remove(filename)
-    return jsonify({'items': items})
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=10000)
+if __name__ == "__main__":
+    # This part is for local development and not used by Render, but it's good practice.
+    app.run(debug=True)
