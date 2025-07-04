@@ -10,6 +10,9 @@ import pandas as pd
 app = Flask(__name__)
 CORS(app)
 
+from flask_cors import CORS
+CORS(app)
+
 @app.route("/")
 def home():
     return "Wild Octave Backend is running!"
