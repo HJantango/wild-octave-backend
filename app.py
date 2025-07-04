@@ -7,6 +7,10 @@ import pytesseract
 from PIL import Image
 import pandas as pd
 
+@app.route("/")
+def home():
+    return "Wild Octave Backend is running!"
+
 app = Flask(__name__)
 CORS(app)
 
