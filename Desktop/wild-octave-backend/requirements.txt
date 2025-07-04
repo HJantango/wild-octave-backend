@@ -1,0 +1,8 @@
+# requirements.txt
+Flask
+flask-cors
+pdfplumber
+pytesseract
+Pillow
+openpyxl
+pandas
