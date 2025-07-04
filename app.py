@@ -7,12 +7,12 @@ import pytesseract
 from PIL import Image
 import pandas as pd
 
+app = Flask(__name__)
+CORS(app)
+
 @app.route("/")
 def home():
     return "Wild Octave Backend is running!"
-
-app = Flask(__name__)
-CORS(app)
 
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
